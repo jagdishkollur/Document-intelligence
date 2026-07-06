@@ -1,0 +1,27 @@
+# --- Core RAG stack ---
+langchain
+langchain-community
+langchain-groq
+chromadb
+sentence-transformers
+
+# --- Document parsing ---
+pypdf
+
+# --- API + serving ---
+fastapi
+uvicorn
+pydantic
+
+# --- UI ---
+streamlit
+
+# --- Experiment tracking ---
+mlflow
+
+# --- Config + utilities ---
+pyyaml
+python-dotenv
+
+# --- Data handling ---
+pandas

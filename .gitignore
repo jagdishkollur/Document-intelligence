@@ -1,0 +1,6 @@
+data/raw/
+vector_store/
+mlflow.db
+__pycache__/
+*.pyc
+.env

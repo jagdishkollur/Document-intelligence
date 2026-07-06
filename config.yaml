@@ -1,0 +1,25 @@
+data:
+  raw_docs_path: data/raw
+
+chunking:
+  chunk_size: 1000
+  chunk_overlap: 150
+
+embedding:
+  model_name: all-MiniLM-L6-v2
+
+vector_store:
+  persist_path: vector_store
+  collection_name: documents
+
+llm:
+  provider: groq
+  model_name: llama-3.3-70b-versatile
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: document-intelligence
+
+api:
+  host: 0.0.0.0
+  port: 8000
