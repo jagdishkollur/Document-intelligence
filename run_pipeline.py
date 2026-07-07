@@ -14,14 +14,9 @@ def main():
     print(f"Watching folder: {config['data']['raw_docs_path']}")
 
     print("\nStarting ingestion...")
+    num_chunks, num_documents = timed_ingestion(run_ingestion, config)
 
-    # Changed from calling run_ingestion(config) directly (R1-R3 behavior)
-    # to timed_ingestion(), which runs the same ingestion function but
-    # also measures duration and logs params/metrics to MLflow (R6) —
-    # run_pipeline.py itself doesn't need to know MLflow exists.
-    num_chunks = timed_ingestion(run_ingestion, config)
-
-    print(f"Ingestion complete. {num_chunks} chunks stored in Chroma.")
+    print(f"Ingestion complete. {num_chunks} chunk(s) stored across {num_documents} document(s).")
     print("Run details logged to MLflow — view with: mlflow ui")
 
 
