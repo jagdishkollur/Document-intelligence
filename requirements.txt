@@ -1,6 +1,7 @@
 # --- Core RAG stack ---
 langchain
 langchain-community
+langchain-text-splitters
 langchain-groq
 chromadb
 sentence-transformers
