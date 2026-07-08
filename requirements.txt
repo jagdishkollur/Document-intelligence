@@ -23,6 +23,7 @@ mlflow
 # --- Config + utilities ---
 pyyaml
 python-dotenv
+python-multipart==0.0.32
 
 # --- Data handling ---
 pandas
