@@ -1,5 +1,6 @@
+import os
 import yaml
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 
 from src.retriever import answer_question, load_vector_collection
@@ -88,13 +89,47 @@ def query(request: QueryRequest):
 @app.post("/ingest", response_model=IngestResponse)
 def ingest():
     """
-    Triggers the same incremental ingestion pipeline run_pipeline.py
-    runs manually -- only NEW or CHANGED files (by content hash) get
-    (re)processed, and the run is logged to MLflow automatically.
-
-    This is the endpoint n8n's workflow will call whenever a new file
-    lands in the watched folder (R7).
+    Triggers the incremental ingestion pipeline over whatever is
+    ALREADY sitting in data/raw/ locally -- only NEW or CHANGED files
+    (by content hash) get (re)processed. Useful for manual/local
+    re-runs. NOT what n8n calls -- n8n uses /ingest-file below, since
+    it has a file's bytes, not local disk access.
     """
+    try:
+        num_chunks, num_documents = timed_ingestion(run_ingestion, config)
+        return IngestResponse(
+            status="success",
+            num_chunks=num_chunks,
+            num_documents=num_documents,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ingestion failed: {e}",
+        )
+
+
+@app.post("/ingest-file", response_model=IngestResponse)
+async def ingest_file(file: UploadFile = File(...)):
+    """
+    Accepts an uploaded file's raw bytes (used by the n8n workflow:
+    n8n downloads a new file from the watched Google Drive folder,
+    then POSTs its bytes here). Saves it into data/raw/, then runs
+    the same incremental ingestion pipeline as /ingest.
+
+    Saving to disk first (rather than embedding bytes in-memory) is
+    intentional -- it keeps data/raw/ as the single source of truth
+    for what's been ingested, and reuses run_ingestion() unchanged.
+    """
+    raw_docs_path = config["data"]["raw_docs_path"]
+    os.makedirs(raw_docs_path, exist_ok=True)
+
+    file_path = os.path.join(raw_docs_path, file.filename)
+    contents = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
     try:
         num_chunks, num_documents = timed_ingestion(run_ingestion, config)
         return IngestResponse(
